@@ -62,8 +62,6 @@ export default function App() {
         <div className="system-info">
           <div><strong>System Info</strong><span className="mini-online">Online</span></div>
           <p><span>Version</span><b>v2.1.0</b></p>
-          <p><span>Cloud</span><b>AWS IoT</b></p>
-          <p><span>Mode</span><b>Real-time</b></p>
         </div>
         <button
           className="theme-button"

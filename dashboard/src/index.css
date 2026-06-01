@@ -887,7 +887,7 @@ body {
 }
 
 .main-surface {
-  padding: 20px 22px;
+  padding: 14px 18px;
   background:
     linear-gradient(90deg, rgba(59, 130, 246, 0.07) 1px, transparent 1px),
     linear-gradient(rgba(59, 130, 246, 0.07) 1px, transparent 1px),
@@ -1075,9 +1075,9 @@ body {
 
 .overview-grid {
   display: grid;
-  grid-template-columns: minmax(440px, 1.25fr) minmax(360px, 1fr) minmax(280px, 0.78fr);
+  grid-template-columns: minmax(520px, 1.25fr) minmax(420px, 1fr) minmax(280px, 0.72fr);
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .lower-grid {
@@ -1175,7 +1175,7 @@ body {
 
 .trend-chart {
   width: 100%;
-  height: 210px;
+  height: 170px;
   margin-top: 12px;
   border: 1px solid rgba(96, 165, 250, 0.14);
   border-radius: 10px;
@@ -1199,7 +1199,7 @@ body {
 .trend-green { stroke: #22c55e; }
 
 .map-canvas {
-  height: 318px;
+  height: 360px;
   border-color: rgba(96, 165, 250, 0.24);
   background:
     radial-gradient(circle at 35% 30%, rgba(34, 197, 94, 0.16), transparent 18%),
@@ -1222,6 +1222,11 @@ body {
   color: #cbd5e1;
   font-size: 12px;
   font-weight: 800;
+}
+
+.map-panel .mappls-canvas,
+.map-panel .map-canvas {
+  min-height: 360px;
 }
 
 .map-legend span {
@@ -1672,7 +1677,15 @@ tbody tr:hover {
   max-height: 70vh;
   overflow-y: auto;
 }
-.map-card { padding: 0; overflow: hidden; min-height: 60vh; }
+.map-card { padding: 0; overflow: hidden; min-height: calc(100vh - 150px); }
+.page-map {
+  min-height: calc(100vh - 28px);
+}
+.page-map .map-card .mappls-canvas,
+.page-map .map-card .map-canvas {
+  min-height: calc(100vh - 170px);
+  height: calc(100vh - 170px);
+}
 
 .banner-err {
   background: rgba(239, 68, 68, 0.1);
@@ -1691,13 +1704,13 @@ tbody tr:hover {
   font-size: 13px;
 }
 .device-table thead {
-  background: linear-gradient(180deg, rgba(20,184,166,.07), rgba(37,99,235,.05));
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.32), rgba(37, 99, 235, 0.2));
 }
 .device-table th {
   text-align: left;
   padding: 12px 14px;
   font-weight: 600;
-  color: #0f1b2d;
+  color: #e0f2fe;
   letter-spacing: 0.02em;
   border-bottom: 1px solid rgba(15, 27, 45, 0.06);
 }
@@ -1849,8 +1862,8 @@ tbody tr:hover {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
 }
-.report-card h3 { margin: 0 0 8px; font-size: 16px; color: #0f1b2d; }
-.report-card p  { margin: 0 0 14px; color: #57708a; font-size: 13px; }
+.report-card h3 { margin: 0 0 8px; font-size: 16px; color: #e0f2fe; }
+.report-card p  { margin: 0 0 14px; color: #b7c8e1; font-size: 13px; }
 
 /* Settings form */
 .form-row {

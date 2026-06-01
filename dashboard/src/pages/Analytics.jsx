@@ -14,6 +14,9 @@ export default function Analytics() {
     { name: "Offline", value: data?.offline || 0 },
     { name: "Alerts", value: data?.alerts || 0 }
   ];
+  const fmt = (value, suffix = "") => Number.isFinite(Number(value))
+    ? `${Number(value).toFixed(2)}${suffix}`
+    : "-";
 
   return (
     <section>
@@ -24,9 +27,9 @@ export default function Analytics() {
         </div>
       </div>
       <div className="metric-row">
-        <Metric label="Avg temp" value={`${data?.averages?.temperature ?? "-"} C`} />
-        <Metric label="Avg humidity" value={`${data?.averages?.humidity ?? "-"}%`} />
-        <Metric label="Avg AQ" value={data?.averages?.air_quality ?? "-"} />
+        <Metric label="Avg temp" value={fmt(data?.averages?.temperature, " C")} />
+        <Metric label="Avg humidity" value={fmt(data?.averages?.humidity, "%")} />
+        <Metric label="Avg AQ" value={fmt(data?.averages?.air_quality)} />
       </div>
       <div className="chart-panel">
         <ResponsiveContainer width="100%" height={320}>
@@ -34,7 +37,7 @@ export default function Analytics() {
             <XAxis dataKey="name" />
             <YAxis allowDecimals={false} />
             <Tooltip />
-            <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill="#38bdf8" radius={[4, 4, 0, 0]} barSize={28} maxBarSize={34} />
           </BarChart>
         </ResponsiveContainer>
       </div>

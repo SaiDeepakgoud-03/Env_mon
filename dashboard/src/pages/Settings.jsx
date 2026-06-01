@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { deleteDevice, fetchDevices } from "../api";
 
 const STORAGE_KEY = "envmon.settings.v1";
 
@@ -20,24 +19,8 @@ function load() {
 export default function Settings() {
   const [cfg,  setCfg]  = useState(load());
   const [saved, setSaved] = useState(false);
-  const [devices, setDevices] = useState([]);
-  const [loadingDevices, setLoadingDevices] = useState(true);
-  const [deviceMsg, setDeviceMsg] = useState("");
 
   useEffect(() => { setSaved(false); }, [cfg]);
-  useEffect(() => { loadDevices(); }, []);
-
-  async function loadDevices() {
-    setLoadingDevices(true);
-    try {
-      const data = await fetchDevices();
-      setDevices(data.devices || []);
-    } catch {
-      setDeviceMsg("Could not load devices.");
-    } finally {
-      setLoadingDevices(false);
-    }
-  }
 
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
@@ -47,18 +30,6 @@ export default function Settings() {
   function reset() {
     localStorage.removeItem(STORAGE_KEY);
     setCfg({ ...defaults });
-  }
-  async function removeDevice(device) {
-    const id = device.device_id;
-    if (!id || !confirm(`Delete device ${device.display_name || id}?`)) return;
-    setDeviceMsg(`Deleting ${id}...`);
-    try {
-      await deleteDevice(id);
-      setDevices((items) => items.filter((item) => item.device_id !== id));
-      setDeviceMsg(`Deleted ${id}.`);
-    } catch {
-      setDeviceMsg(`Delete failed for ${id}.`);
-    }
   }
 
   return (
@@ -116,51 +87,6 @@ export default function Settings() {
             {saved ? "Saved ✓" : "Save settings"}
           </button>
           <button className="ghost-btn" onClick={reset}>Reset to defaults</button>
-        </div>
-      </div>
-
-      <div className="card form-card">
-        <div className="settings-section-head">
-          <div>
-            <h2>Device Cleanup</h2>
-            <p className="page-sub">Remove devices from the dashboard database.</p>
-          </div>
-          <button className="ghost-btn" onClick={loadDevices}>Refresh</button>
-        </div>
-
-        {deviceMsg && <p className="hint">{deviceMsg}</p>}
-        <div className="table-wrap">
-          <table className="device-table">
-            <thead>
-              <tr>
-                <th>Device</th>
-                <th>Status</th>
-                <th>Location</th>
-                <th>Last seen</th>
-                <th>Delete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loadingDevices ? (
-                <tr><td colSpan="5" className="empty">Loading devices...</td></tr>
-              ) : devices.length === 0 ? (
-                <tr><td colSpan="5" className="empty">No devices found.</td></tr>
-              ) : devices.map((device) => (
-                <tr key={device.device_id}>
-                  <td>
-                    <strong>{device.display_name || device.device_id}</strong>
-                    <small>{device.display_name ? device.device_id : ""}</small>
-                  </td>
-                  <td><span className={device.online ? "status-pill online" : "status-pill offline"}>{device.online ? "Online" : "Offline"}</span></td>
-                  <td>{[device.location?.place, device.location?.district, device.location?.state].filter(Boolean).join(", ") || "-"}</td>
-                  <td>{device.last_seen ? new Date(Number(device.last_seen)).toLocaleString() : "-"}</td>
-                  <td>
-                    <button className="danger-btn" onClick={() => removeDevice(device)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
     </section>

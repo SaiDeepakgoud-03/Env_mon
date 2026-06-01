@@ -46,9 +46,10 @@ export default function Reports() {
     try {
       const r = await fetchReadings(deviceId, 500);
       const header = "timestamp,iso_time,temperature,humidity,air_quality,fire";
-      const rows = (r.history || []).map(h => [
-        h.timestamp,
-        new Date(Number(h.timestamp)).toISOString(),
+      const history = r.history || r.readings || [];
+      const rows = history.map(h => [
+        h.timestamp || h.ts || h.created_at,
+        new Date(Number(h.timestamp || h.ts || h.created_at)).toISOString(),
         h.temperature, h.humidity, h.air_quality, h.fire,
       ].map(csvEscape).join(","));
       download(`${deviceId}-readings.csv`, [header, ...rows].join("\n"));

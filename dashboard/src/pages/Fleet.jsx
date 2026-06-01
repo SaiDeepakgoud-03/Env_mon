@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import MapplsDeviceMap from "../components/MapplsDeviceMap.jsx";
 import { fetchDevices } from "../api.js";
 import { setFireAlarmActive } from "../fireAlarm.js";
@@ -21,16 +20,6 @@ function ago(ms) {
   return `${Math.round(minutes / 60)}h ago`;
 }
 
-function locationText(device) {
-  return [
-    device.location?.place,
-    device.location?.landmark,
-    device.location?.district,
-    device.location?.state,
-    device.location?.country
-  ].filter(Boolean).join(", ");
-}
-
 function average(devices, key) {
   const values = devices
     .map((device) => Number(device[key]))
@@ -39,15 +28,10 @@ function average(devices, key) {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-function maxDevice(devices, key) {
-  return devices.reduce((best, device) => Number(device[key] || 0) > Number(best?.[key] || 0) ? device : best, devices[0]);
-}
-
 export default function Fleet() {
   const [fleet, setFleet] = useState({ devices: [] });
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
-  const [mqttStatus, setMqttStatus] = useState("starting");
   const [error, setError] = useState("");
 
   async function load() {
@@ -79,7 +63,7 @@ export default function Fleet() {
             }
           : device)
       }));
-    }, setMqttStatus);
+    });
     return () => {
       clearInterval(interval);
       mqtt.end?.(true);
@@ -104,7 +88,6 @@ export default function Fleet() {
   const avgTemp = average(displayDevices, "last_temperature");
   const avgHumidity = average(displayDevices, "last_humidity");
   const avgAq = average(displayDevices, "last_air_quality");
-  const hottest = maxDevice(displayDevices, "last_temperature");
   /* "stale" = silent for more than 2x the active window (here, 2 min). */
   const staleCount = displayDevices.filter((device) =>
     Date.now() - Number(device.last_seen || 0) > ACTIVE_WINDOW_MS * 2).length;
@@ -125,7 +108,6 @@ export default function Fleet() {
         <div className="topbar-actions">
           <span className="connection"><b /> System Status: {offlineDevices.length ? "Attention Needed" : "All Systems Operational"}</span>
           <input placeholder="Search devices, locations..." value={query} onChange={(e) => setQuery(e.target.value)} />
-          <span className="connection">MQTT {mqttStatus}</span>
         </div>
       </div>
 
@@ -149,44 +131,11 @@ export default function Fleet() {
       </div>
 
       <div className="overview-grid">
-        <LivePanel devices={displayDevices} />
+        <LivePanel devices={displayDevices} avgTemp={avgTemp} avgHumidity={avgHumidity} avgAq={avgAq} fireAlerts={fireAlerts} />
         <MapPanel devices={visibleDevices} />
-        <RecentAlerts devices={displayDevices} />
-      </div>
-
-      <div className="lower-grid">
-        <div className="table-panel">
-          <div className="panel-head">
-            <h2>Device Status</h2>
-            <span>{visibleDevices.length} shown</span>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Device</th>
-                <th>Status</th>
-                <th>Location</th>
-                <th>Sensors</th>
-                <th>Last seen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleDevices.map((device) => (
-                <tr key={device.device_id}>
-                  <td><Link to={`/devices/${device.device_id}`} className="mono-link">{device.display_name || device.device_id}</Link><small>{device.display_name ? device.device_id : ""}</small></td>
-                  <td><Status online={device.online} /></td>
-                  <td>{device.location?.place || "-"}<small>{[device.location?.district, device.location?.state, device.location?.country].filter(Boolean).join(", ")}</small></td>
-                  <td>{Number(device.last_temperature ?? 0).toFixed(1)} C / {device.last_humidity ?? "-"}%</td>
-                  <td>{ago(device.last_seen)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {error && <p className="form-error">{error}</p>}
-        </div>
         <AirQualityPanel value={avgAq} devices={displayDevices} />
-        <SensorPanel hottest={hottest} avgTemp={avgTemp} avgHumidity={avgHumidity} avgAq={avgAq} fireAlerts={fireAlerts} />
       </div>
+      {error && <p className="form-error">{error}</p>}
     </section>
   );
 }
@@ -202,10 +151,6 @@ function Metric({ label, value, accent = "blue", icon = "grid", detail = "" }) {
   );
 }
 
-function Status({ online }) {
-  return <span className={`status ${online ? "online" : "offline"}`}>{online ? "Online" : "Offline"}</span>;
-}
-
 function MapPanel({ devices }) {
   return (
     <aside className="map-panel console-panel">
@@ -216,22 +161,11 @@ function MapPanel({ devices }) {
         <span><DashIcon name="warning" />Warning ({devices.filter((d) => Number(d.last_air_quality || 0) > 100).length})</span>
         <span><DashIcon name="power" />Offline ({devices.filter((d) => !d.online).length})</span>
       </div>
-      <div className="location-card-grid">
-        {devices.map((device) => (
-          <Link className="location-card" to={`/devices/${device.device_id}`} key={device.device_id}>
-            <span className={`status-dot ${device.online ? "online" : "offline"} ${Number(device.last_fire) === 1 ? "fire" : ""}`} />
-            <b>{device.display_name || device.location?.place || device.device_id}</b>
-            <span>{locationText(device) || "Location not set"}</span>
-            <small>{Number(device.last_temperature ?? 0).toFixed(1)} C / {device.last_humidity ?? "-"}%</small>
-          </Link>
-        ))}
-      </div>
     </aside>
   );
 }
 
-function LivePanel({ devices }) {
-  const latest = devices[0] || {};
+function LivePanel({ devices, avgTemp, avgHumidity, avgAq, fireAlerts }) {
   return (
     <section className="console-panel live-panel">
       <div className="panel-head">
@@ -239,10 +173,10 @@ function LivePanel({ devices }) {
         <span className="live-dot">Live</span>
       </div>
       <div className="mini-metrics">
-        <MiniMetric label="Temperature" value={`${Number(latest.last_temperature ?? 0).toFixed(1)} C`} tone="red" icon="thermometer" />
-        <MiniMetric label="Humidity" value={`${Number(latest.last_humidity ?? 0).toFixed(1)}%`} tone="blue" icon="drop" />
-        <MiniMetric label="Air Quality" value={Math.round(Number(latest.last_air_quality ?? 0))} tone="green" icon="wind" />
-        <MiniMetric label="Fire Status" value={devices.some((d) => Number(d.last_fire) === 1) ? "Detected" : "All Clear"} tone="safe" icon="shield" />
+        <MiniMetric label="Temperature" value={`${avgTemp.toFixed(1)} C`} tone="red" icon="thermometer" />
+        <MiniMetric label="Humidity" value={`${avgHumidity.toFixed(1)}%`} tone="blue" icon="drop" />
+        <MiniMetric label="Air Quality" value={Math.round(Number(avgAq || 0))} tone="green" icon="wind" />
+        <MiniMetric label="Fire Status" value={fireAlerts ? "Detected" : "All Clear"} tone="safe" icon="shield" />
       </div>
       <TrendChart />
     </section>
@@ -265,27 +199,6 @@ function TrendChart() {
   );
 }
 
-function RecentAlerts({ devices }) {
-  const alerts = [
-    ...devices.filter((d) => Number(d.last_fire) === 1).map((d) => ({ title: "Fire Detected", device: d, tone: "critical" })),
-    ...devices.filter((d) => Number(d.last_air_quality || 0) > 100).map((d) => ({ title: "Poor Air Quality", device: d, tone: "warning" })),
-    ...devices.filter((d) => !d.online).map((d) => ({ title: "Device Offline", device: d, tone: "critical" }))
-  ].slice(0, 4);
-  return (
-    <section className="console-panel alerts-panel">
-      <div className="panel-head"><h2>Recent Alerts</h2><span>View All</span></div>
-      {(alerts.length ? alerts : [{ title: "All Systems Clear", device: devices[0] || {}, tone: "info" }]).map((alert, index) => (
-        <div className={`alert-item ${alert.tone}`} key={`${alert.title}-${index}`}>
-          <DashIcon name={alert.tone === "critical" ? "warning" : alert.tone === "warning" ? "wind" : "shield"} />
-          <b>{alert.title}</b>
-          <span>{alert.device?.display_name || alert.device?.device_id || "Environment Monitor"}</span>
-          <small>{ago(alert.device?.last_seen)}</small>
-        </div>
-      ))}
-    </section>
-  );
-}
-
 function AirQualityPanel({ value, devices }) {
   const safe = devices.filter((d) => Number(d.last_air_quality || 0) <= 50).length;
   const moderate = devices.filter((d) => Number(d.last_air_quality || 0) > 50 && Number(d.last_air_quality || 0) <= 100).length;
@@ -302,32 +215,6 @@ function AirQualityPanel({ value, devices }) {
         <p><DashIcon name="shield" />Good<span>{safe} Devices</span></p>
         <p><DashIcon name="wind" />Moderate<span>{moderate} Devices</span></p>
         <p><DashIcon name="warning" />Unhealthy<span>{warning} Devices</span></p>
-      </div>
-    </section>
-  );
-}
-
-function SensorPanel({ hottest, avgTemp, avgHumidity, avgAq, fireAlerts }) {
-  const cards = [
-    ["Temperature", `${avgTemp.toFixed(1)} C`, "red", "thermometer"],
-    ["Humidity", `${avgHumidity.toFixed(1)}%`, "blue", "drop"],
-    ["Air Quality", `${Math.round(avgAq)} AQI`, "green", "wind"],
-    ["Highest Device", hottest?.display_name || hottest?.device_id || "-", "amber", "router"],
-    ["Last Seen", ago(hottest?.last_seen), "purple", "clock"],
-    ["Fire Status", fireAlerts ? "Detected" : "All Clear", fireAlerts ? "red" : "green", "shield"]
-  ];
-  return (
-    <section className="console-panel sensor-panel">
-      <div className="panel-head"><h2>Sensor Readings</h2><span>Real-time</span></div>
-      <div className="sensor-grid">
-        {cards.map(([label, value, tone, icon]) => (
-          <div className={`sensor-card ${tone}`} key={label}>
-            <DashIcon name={icon} />
-            <span>{label}</span>
-            <strong>{value}</strong>
-            <i />
-          </div>
-        ))}
       </div>
     </section>
   );

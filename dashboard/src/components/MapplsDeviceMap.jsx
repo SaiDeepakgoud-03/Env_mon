@@ -30,6 +30,7 @@ export default function MapplsDeviceMap({ devices }) {
   const mapId = useMemo(() => `mappls-${Math.random().toString(36).slice(2)}`, []);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const fittedRef = useRef(false);
   const [state, setState] = useState(hasMapplsKey() ? "loading" : "missing-key");
   const [message, setMessage] = useState("");
   const [resolved, setResolved] = useState([]);
@@ -107,10 +108,11 @@ export default function MapplsDeviceMap({ devices }) {
         map,
         position: { type: "FeatureCollection", features: coordinateFeatures },
         icon_url: "https://apis.mappls.com/map_v3/1.png",
-        fitbounds: true,
+        fitbounds: !fittedRef.current,
         clusters: false,
         fitboundOptions: { padding: 80, duration: 800 }
       });
+      fittedRef.current = true;
     }
 
     if (eLocItems.length && markerApi.pinMarker) {
@@ -118,8 +120,9 @@ export default function MapplsDeviceMap({ devices }) {
         map,
         pin: eLocItems.map((item) => item.geocode.eLoc),
         popupHtml: eLocItems.map((item) => popupHtml(item.device, item.geocode)),
-        fitbounds: !coordinateFeatures.length
+        fitbounds: !coordinateFeatures.length && !fittedRef.current
       });
+      fittedRef.current = true;
     }
     if (!coordinateFeatures.length && !eLocItems.length) {
       setMessage("Map loaded. Add latitude/longitude or a more complete address to place exact pins.");

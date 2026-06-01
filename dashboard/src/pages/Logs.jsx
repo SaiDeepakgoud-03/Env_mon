@@ -33,7 +33,7 @@ export default function Logs() {
     fetchDevices().then(d => {
       (d.devices || []).forEach(dev => {
         push({ level: "info", source: dev.device_id,
-               msg: `Registered. Wi-Fi=${dev.ssid} IP=${dev.ip}` });
+               msg: "Registered in dashboard" });
       });
     }).catch(() => {});
 
