@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        Android 9+ blocks plain HTTP by default. The ESP32 in captive-portal
+        mode is reachable only over HTTP at 192.168.4.1, so we explicitly
+        permit cleartext to that local IP (and the AP DHCP range).
+        All other endpoints, including the AWS API, still require HTTPS.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.4.1</domain>
+        <domain includeSubdomains="false">192.168.4.2</domain>
+        <domain includeSubdomains="false">192.168.4.3</domain>
+        <domain includeSubdomains="false">192.168.4.4</domain>
+    </domain-config>
+</network-security-config>

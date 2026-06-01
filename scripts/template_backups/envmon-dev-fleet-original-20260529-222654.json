@@ -1,0 +1,44 @@
+{
+  "Parameters": {
+    "ThingName": { "Type": "String" },
+    "SerialNumber": { "Type": "String" },
+    "DeviceId": { "Type": "String" },
+    "Place": { "Type": "String" },
+    "Landmark": { "Type": "String" },
+    "District": { "Type": "String" },
+    "State": { "Type": "String" },
+    "Country": { "Type": "String" }
+  },
+  "Resources": {
+    "thing": {
+      "Type": "AWS::IoT::Thing",
+      "Properties": {
+        "ThingName": { "Ref": "ThingName" },
+        "ThingTypeName": "environment-monitor-dev-device",
+        "AttributePayload": {
+          "device_id": { "Ref": "DeviceId" },
+          "serial_number": { "Ref": "SerialNumber" },
+          "place": { "Ref": "Place" },
+          "landmark": { "Ref": "Landmark" },
+          "district": { "Ref": "District" },
+          "state": { "Ref": "State" },
+          "country": { "Ref": "Country" }
+        }
+      }
+    },
+    "certificate": {
+      "Type": "AWS::IoT::Certificate",
+      "Properties": {
+        "CertificateId": { "Ref": "AWS::IoT::Certificate::Id" },
+        "Status": "ACTIVE"
+      }
+    },
+    "policy": {
+      "Type": "AWS::IoT::Policy",
+      "Properties": {
+        "PolicyName": "environment-monitor-dev-device-policy"
+      }
+    }
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "ruleName": "EnvironmentDataToLambda",
+  "topicRulePayload": {
+    "sql": "SELECT *, topic() as mqtt_topic, timestamp() as timestamp FROM 'environment/data'",
+    "awsIotSqlVersion": "2016-03-23",
+    "description": "Forward every reading published on environment/data to the EnvironmentMonitor Lambda (which writes to DynamoDB).",
+    "ruleDisabled": false,
+    "actions": [
+      {
+        "lambda": {
+          "functionArn": "arn:aws:lambda:us-east-1:REPLACE_ACCOUNT_ID:function:EnvironmentMonitor"
+        }
+      }
+    ],
+    "errorAction": {
+      "cloudwatchLogs": {
+        "logGroupName": "/aws/iot/environment-monitor-errors",
+        "roleArn":      "arn:aws:iam::REPLACE_ACCOUNT_ID:role/IoTRuleErrorLoggingRole"
+      }
+    }
+  }
+}

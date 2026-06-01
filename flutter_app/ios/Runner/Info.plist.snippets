@@ -1,0 +1,25 @@
+<!--
+  iOS Info.plist additions
+  ========================
+  After running `flutter create .` add these keys inside the top-level <dict>
+  of ios/Runner/Info.plist:
+
+      <key>NSAppTransportSecurity</key>
+      <dict>
+          <key>NSAllowsArbitraryLoadsForMedia</key><false/>
+          <key>NSAllowsLocalNetworking</key><true/>
+          <key>NSExceptionDomains</key>
+          <dict>
+              <key>192.168.4.1</key>
+              <dict>
+                  <key>NSExceptionAllowsInsecureHTTPLoads</key><true/>
+              </dict>
+          </dict>
+      </dict>
+
+      <key>NSLocationWhenInUseUsageDescription</key>
+      <string>EnvMon uses your GPS to tag the device's exact install location.</string>
+
+      <key>NSLocalNetworkUsageDescription</key>
+      <string>EnvMon needs to talk to the device hotspot at 192.168.4.1.</string>
+-->

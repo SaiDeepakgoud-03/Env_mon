@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "iot:Connect",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iot:Publish",
+      "Resource": [
+        "arn:aws:iot:us-east-1:077463315120:topic/$aws/certificates/create/json",
+        "arn:aws:iot:us-east-1:077463315120:topic/$aws/provisioning-templates/envmon-dev-fleet/provision/json"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["iot:Subscribe", "iot:Receive"],
+      "Resource": "*"
+    }
+  ]
+}

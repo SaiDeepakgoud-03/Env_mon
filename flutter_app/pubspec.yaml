@@ -1,0 +1,28 @@
+name: envmon_app
+description: EnvMon — provision your ESP32 and watch live sensor data.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # HTTP client used for both the local ESP32 (192.168.4.1)
+  # and the AWS API Gateway endpoint.
+  http: ^1.2.1
+
+  # GPS coordinates for the provisioning form.
+  geolocator: ^11.0.0
+
+  # Open OS Wi-Fi settings on the "Join EnvMon-Setup" step.
+  app_settings: ^5.1.1
+
+  # Real-time line charts on the device detail page.
+  fl_chart: ^0.68.0
+
+flutter:
+  uses-material-design: true

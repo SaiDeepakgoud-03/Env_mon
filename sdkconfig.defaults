@@ -1,0 +1,50 @@
+# sdkconfig.defaults
+#
+# These defaults are merged into sdkconfig by `idf.py reconfigure` on first
+# build (or whenever sdkconfig is missing). They keep the project building
+# consistently across machines.
+
+# ---------------------------------------------------------------
+# Partition table  (we need >1 MB app slot for mbedTLS + MQTT)
+# ---------------------------------------------------------------
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# ---------------------------------------------------------------
+# Stack & memory
+# ---------------------------------------------------------------
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+CONFIG_FREERTOS_HZ=1000
+
+# ---------------------------------------------------------------
+# mbedTLS / TLS support for AWS IoT Core
+# ---------------------------------------------------------------
+CONFIG_MBEDTLS_HARDWARE_AES=y
+CONFIG_MBEDTLS_HARDWARE_SHA=y
+CONFIG_MBEDTLS_HARDWARE_MPI=y
+CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_2=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_3=y
+
+# Built-in CA bundle for esp_http_client (used by send_to_dashboard)
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL=y
+
+# ---------------------------------------------------------------
+# MQTT
+# ---------------------------------------------------------------
+CONFIG_MQTT_PROTOCOL_311=y
+CONFIG_MQTT_TRANSPORT_SSL=y
+CONFIG_MQTT_USE_CUSTOM_CONFIG=y
+CONFIG_MQTT_OUTBOX_EXPIRED_TIMEOUT_MS=30000
+
+# ---------------------------------------------------------------
+# Log levels
+# ---------------------------------------------------------------
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_EQUALS_DEFAULT=y
+
+# ---------------------------------------------------------------
+# Flash size
+# ---------------------------------------------------------------
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="4MB"

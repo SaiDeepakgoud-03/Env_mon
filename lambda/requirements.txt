@@ -1,0 +1,3 @@
+# Lambda Python 3.12 runtime already includes boto3, so this file is
+# normally empty. It exists for local development / unit tests.
+boto3>=1.34.0

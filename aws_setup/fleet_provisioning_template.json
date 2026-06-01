@@ -1,0 +1,55 @@
+{
+  "Parameters": {
+    "SerialNumber": { "Type": "String" },
+    "device_id":    { "Type": "String" },
+    "place":        { "Type": "String" },
+    "landmark":     { "Type": "String" },
+    "district":     { "Type": "String" },
+    "state":        { "Type": "String" },
+    "country":      { "Type": "String" },
+    "AWS::IoT::Certificate::Id": { "Type": "String" }
+  },
+
+  "Resources": {
+
+    "thing": {
+      "Type": "AWS::IoT::Thing",
+      "Properties": {
+        "ThingName": { "Ref": "device_id" },
+        "AttributePayload": {
+          "serial_number": { "Ref": "SerialNumber" },
+          "device_id":     { "Ref": "device_id" },
+          "place":         { "Ref": "place" },
+          "landmark":      { "Ref": "landmark" },
+          "district":      { "Ref": "district" },
+          "state":         { "Ref": "state" },
+          "country":       { "Ref": "country" }
+        },
+
+        "ThingGroups": [ "EnvironmentMonitors" ]
+      },
+
+      "OverrideSettings": {
+        "AttributePayload": "MERGE",
+        "ThingTypeName":    "REPLACE",
+        "ThingGroups":      "DO_NOTHING"
+      }
+    },
+
+    "certificate": {
+      "Type": "AWS::IoT::Certificate",
+      "Properties": {
+        "CertificateId": { "Ref": "AWS::IoT::Certificate::Id" },
+        "Status":        "ACTIVE"
+      },
+      "OverrideSettings": { "Status": "REPLACE" }
+    },
+
+    "policy": {
+      "Type": "AWS::IoT::Policy",
+      "Properties": {
+        "PolicyName": "EnvMonDevicePolicy"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+## IDF Component Manager Manifest File
+##
+## Pulled automatically by `idf.py reconfigure` from
+## https://components.espressif.com.
+
+dependencies:
+  idf:
+    version: ">=5.3"
+
+  ## DHT11 / DHT22 driver from esp-idf-lib
+  esp-idf-lib/dht: "*"
+
+  ## cJSON (registered as component name "json" once installed)
+  espressif/cjson: "*"
+
+  ## Managed MQTT client component
+  espressif/mqtt: "*"
