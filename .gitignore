@@ -54,3 +54,5 @@ backend/terraform/*.tfplan
 
 # --- Android generated output ------------------------------------------------
 mobile_app_android/manual_build/
+
+.vercel
